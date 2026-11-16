@@ -23,12 +23,17 @@ from typing import Any
 
 import yaml
 
-SERVER_NAME = "flowforge-engine"
-SERVER_VERSION = "1.0.0"
-DEFAULT_PROTOCOL_VERSION = "2025-03-26"
-
 # Resolve workspace root: <root>/.agents/plugins/flowforge-studio/scripts/flowforge_mcp_server.py
 SCRIPT_PATH = Path(__file__).resolve()
+if str(SCRIPT_PATH.parent) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_PATH.parent))
+
+import memory_engine
+
+SERVER_NAME = "flowforge-engine"
+SERVER_VERSION = "1.1.0"
+DEFAULT_PROTOCOL_VERSION = "2025-03-26"
+
 WORKSPACE_ROOT = Path(os.environ.get("FLOWFORGE_ROOT", str(SCRIPT_PATH.parents[4]))).resolve()
 PRODUCTIONS_ROOT = (WORKSPACE_ROOT / "productions").resolve()
 TEMPLATES_ROOT = (WORKSPACE_ROOT / "templates").resolve()
@@ -153,12 +158,14 @@ def tool_init_production(args: dict[str, Any]) -> dict[str, Any]:
         raise FileExistsError(f"Production '{slug}' already exists. Pass overwrite=true only if intentional.")
 
     subdirs = [
+        "00_references",
         "01_universe_bible",
         "02_cast_and_ingredients/portraits",
         "02_cast_and_ingredients/locations",
         "02_cast_and_ingredients/props",
         "03_sound_and_music/tracks",
         "episodes",
+        "memory",
     ]
     for sub in subdirs:
         (prod_dir / sub).mkdir(parents=True, exist_ok=True)
@@ -229,6 +236,7 @@ def tool_init_production(args: dict[str, Any]) -> dict[str, Any]:
             "voices": [],
         },
     )
+    memory_engine.index_production_files(prod_dir, force_rebuild=False)
 
     return {
         "status": "initialized",
@@ -443,6 +451,7 @@ def tool_register_cast_asset(args: dict[str, Any]) -> dict[str, Any]:
 
     registry["updated_at"] = utc_now_iso()
     write_json(reg_path, registry)
+    memory_engine.index_production_files(prod_dir, force_rebuild=False)
 
     return {
         "status": "updated" if replaced else "registered",
@@ -587,6 +596,7 @@ def tool_validate_shot_manifest(args: dict[str, Any]) -> dict[str, Any]:
         manifest["validated_at"] = utc_now_iso()
         manifest["estimated_total_credits"] = total_credits
         write_json(manifest_path, manifest)
+        memory_engine.index_production_files(prod_dir, force_rebuild=False)
 
     return {
         "valid": len(errors) == 0,
@@ -1025,7 +1035,75 @@ def tool_master_episode(args: dict[str, Any]) -> dict[str, Any]:
         "loudness_target": "-14 LUFS (EBU R128)",
     }
     write_json(ep_dir / "05_master" / "master_report.json", report)
+    memory_engine.index_production_files(prod_dir, force_rebuild=False)
     return report
+
+
+def tool_index_production(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.index_production_files(prod_dir, force_rebuild=bool(args.get("force_rebuild", False)))
+
+
+def tool_search(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.search_production(
+        prod_dir,
+        query=args["query"],
+        scope=args.get("scope", "all"),
+        episode_number=args.get("episode_number"),
+        memory_type=args.get("memory_type"),
+        entity_id=args.get("entity_id"),
+        limit=int(args.get("limit", 10)),
+    )
+
+
+def tool_memory_save(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.save_canon_memory(
+        prod_dir,
+        title=args["title"],
+        content=args["content"],
+        memory_type=args.get("memory_type", "canon_fact"),
+        topic_key=args.get("topic_key"),
+        episode_number=args.get("episode_number"),
+        entities=args.get("entities"),
+        status=args.get("status", "active"),
+    )
+
+
+def tool_memory_context(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.get_canon_context(
+        prod_dir,
+        up_to_episode=args.get("up_to_episode"),
+        limit=int(args.get("limit", 30)),
+    )
+
+
+def tool_graph_link(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.upsert_graph_relation(
+        prod_dir,
+        subject_id=args["subject_id"],
+        relation=args["relation"],
+        object_id=args["object_id"],
+        since_episode=int(args.get("since_episode", 1)),
+        until_episode=args.get("until_episode"),
+        notes=args.get("notes", ""),
+    )
+
+
+def tool_entity_dossier(args: dict[str, Any]) -> dict[str, Any]:
+    prod_dir = resolve_production_dir(args["production_slug"])
+    return memory_engine.build_entity_dossier(
+        prod_dir,
+        entity_id=args["entity_id"],
+        up_to_episode=args.get("up_to_episode"),
+    )
+
+
+def tool_craft_kb(args: dict[str, Any]) -> dict[str, Any]:
+    return memory_engine.manage_craft_kb(WORKSPACE_ROOT, args)
 
 
 # ---------------------------------------------------------------------------
@@ -1196,6 +1274,130 @@ TOOLS_SCHEMA: list[dict[str, Any]] = [
             "required": ["production_slug", "episode_id", "clip_rel_paths"],
         },
     },
+    {
+        "name": "flowforge_index_production",
+        "description": "Incrementally index (SHA-256 deduplicated) all Markdown bibles, scripts, shot manifests, cast registries, SRT subtitles, and 00_references/ files of a production into its FTS5 BM25 database.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "force_rebuild": {"type": "boolean", "default": False},
+            },
+            "required": ["production_slug"],
+        },
+    },
+    {
+        "name": "flowforge_search",
+        "description": "Hybrid FTS5 + BM25 search (diacritic-insensitive) across a production's indexed scripts, bibles, shots, subtitles, references, and canon memories.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "query": {"type": "string"},
+                "scope": {
+                    "type": "string",
+                    "enum": ["all", "memories", "documents", "bible", "scripts", "shots", "cast", "subtitles", "reference"],
+                    "default": "all",
+                },
+                "episode_number": {"type": "integer", "description": "Filter up to a given episode number"},
+                "memory_type": {"type": "string"},
+                "entity_id": {"type": "string"},
+                "limit": {"type": "integer", "default": 10},
+            },
+            "required": ["production_slug", "query"],
+        },
+    },
+    {
+        "name": "flowforge_memory_save",
+        "description": "Save or upsert (via topic_key with revision history) a persistent canon fact, character/prop state mutation, open plot thread, visual rule, or director preference.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "title": {"type": "string"},
+                "content": {"type": "string"},
+                "memory_type": {
+                    "type": "string",
+                    "enum": [
+                        "canon_fact",
+                        "state_change",
+                        "plot_thread",
+                        "visual_rule",
+                        "director_preference",
+                        "continuity_warning",
+                    ],
+                    "default": "canon_fact",
+                },
+                "topic_key": {"type": "string", "description": "Stable key for evolving topics (e.g. 'state/elena/watch')"},
+                "episode_number": {"type": "integer"},
+                "entities": {"type": "array", "items": {"type": "string"}},
+                "status": {"type": "string", "enum": ["active", "resolved", "archived"], "default": "active"},
+            },
+            "required": ["production_slug", "title", "content"],
+        },
+    },
+    {
+        "name": "flowforge_memory_context",
+        "description": "Retrieve structured active canon context (open plot threads, character state changes, director preferences, and index stats) up to a given episode.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "up_to_episode": {"type": "integer"},
+                "limit": {"type": "integer", "default": 30},
+            },
+            "required": ["production_slug"],
+        },
+    },
+    {
+        "name": "flowforge_graph_link",
+        "description": "Record or update a directed relationship in the production's Canon Knowledge Graph (subject_id -> relation -> object_id) with episode validity bounds.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "subject_id": {"type": "string"},
+                "relation": {"type": "string"},
+                "object_id": {"type": "string"},
+                "since_episode": {"type": "integer", "default": 1},
+                "until_episode": {"type": "integer"},
+                "notes": {"type": "string"},
+            },
+            "required": ["production_slug", "subject_id", "relation", "object_id"],
+        },
+    },
+    {
+        "name": "flowforge_entity_dossier",
+        "description": "Compile a 360-degree canon dossier for any character, prop, or location up to a target episode (cast_registry descriptor + state mutations + graph edges + past appearances).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "production_slug": {"type": "string"},
+                "entity_id": {"type": "string"},
+                "up_to_episode": {"type": "integer"},
+            },
+            "required": ["production_slug", "entity_id"],
+        },
+    },
+    {
+        "name": "flowforge_craft_kb",
+        "description": "Save or search cross-production technical learnings on Google Flow models, optics, camera moves, and audio mastering (zero narrative lore).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["save", "search"]},
+                "query": {"type": "string"},
+                "topic_key": {"type": "string"},
+                "category": {"type": "string", "default": "cinematography"},
+                "flow_model": {"type": "string", "default": "general"},
+                "title": {"type": "string"},
+                "content": {"type": "string"},
+                "tags": {"type": "array", "items": {"type": "string"}},
+                "limit": {"type": "integer", "default": 10},
+            },
+            "required": ["action"],
+        },
+    },
 ]
 
 TOOL_HANDLERS = {
@@ -1209,6 +1411,13 @@ TOOL_HANDLERS = {
     "flowforge_probe_media": tool_probe_media,
     "flowforge_render_contact_sheet": tool_render_contact_sheet,
     "flowforge_master_episode": tool_master_episode,
+    "flowforge_index_production": tool_index_production,
+    "flowforge_search": tool_search,
+    "flowforge_memory_save": tool_memory_save,
+    "flowforge_memory_context": tool_memory_context,
+    "flowforge_graph_link": tool_graph_link,
+    "flowforge_entity_dossier": tool_entity_dossier,
+    "flowforge_craft_kb": tool_craft_kb,
 }
 
 

@@ -19,6 +19,8 @@ El árbol de directorios expresa de inmediato su propósito cinematográfico (Sc
 │   └── {production_slug}/
 │       ├── production.yaml                        # Estado maestro, visual_dna y topes de créditos
 │       ├── credit_ledger.json                     # Libro mayor auditable de créditos AI Ultra
+│       ├── memory/                                # canon.db (FTS5/BM25) + canon_snapshot.json (Git)
+│       ├── 00_references/                         # Documentos de lore/investigación indexables
 │       ├── 01_universe_bible/                     # Biblia de mundo y arco de temporada
 │       ├── 02_cast_and_ingredients/               # cast_registry.json + retratos 0 créditos
 │       ├── 03_sound_and_music/                    # sound_bible.md + voice_cast.json + pistas

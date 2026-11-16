@@ -11,6 +11,14 @@ productions/**/03_sound_and_music/tracks/*.wav
 productions/**/03_sound_and_music/tracks/*.mp3
 productions/**/03_sound_and_music/tracks/*.flac
 
+# SQLite binary indexes & WAL journals (canon_snapshot.json stays tracked in Git!)
+productions/**/memory/*.db
+productions/**/memory/*.db-wal
+productions/**/memory/*.db-shm
+.studio_memory/*.db
+.studio_memory/*.db-wal
+.studio_memory/*.db-shm
+
 # Runtime & OS artifacts
 __pycache__/
 *.py[cod]

@@ -10,3 +10,7 @@
 3. **Aislamiento y Continuidad Episódica**:
    - Toda operación exige un `production_slug` válido dentro de `productions/{production_slug}/`.
    - En cada plano de `shot_manifest.json`, inyecta literalmente el campo `verbatim_prompt_descriptor` de cada personaje/objeto presente desde `02_cast_and_ingredients/cast_registry.json`, ya que Google Flow no conserva memoria entre escenas.
+4. **Protocolo Obligatorio de Memoria e Indexación Continua**:
+   - Antes de redactar o desglosar un capítulo, consulta `flowforge_memory_context`, `flowforge_entity_dossier` o `flowforge_search` (además de `flowforge_craft_kb(action="search")` para mejores prácticas ópticas).
+   - Después de aprobar una biblia, cambiar el estado de un personaje/objeto, resolver un hilo argumental o cerrar un capítulo, llama proactivamente a `flowforge_memory_save` (con `topic_key`), `flowforge_graph_link` y `flowforge_index_production`.
+   - Nunca mezcles tramas ni nombres de personajes dentro de `flowforge_craft_kb`; ese almacén es exclusivamente para conocimiento técnico reutilizable entre producciones.
