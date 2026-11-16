@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "flowforge-engine": {
+      "command": "/usr/bin/python3",
+      "args": [
+        "scripts/flowforge_mcp_server.py"
+      ]
+    }
+  }
+}

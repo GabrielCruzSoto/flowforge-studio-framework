@@ -1,0 +1,20 @@
+# Heavy audiovisual renders & binaries (kept out of editorial Git history)
+productions/**/03_flow_renders/raw_clips/*.mp4
+productions/**/03_flow_renders/raw_clips/*.mov
+productions/**/03_flow_renders/raw_clips/*.webm
+productions/**/04_dialogue_and_sfx/*.wav
+productions/**/04_dialogue_and_sfx/*.m4a
+productions/**/04_dialogue_and_sfx/*.mp3
+productions/**/05_master/*.mp4
+productions/**/05_master/*.mov
+productions/**/03_sound_and_music/tracks/*.wav
+productions/**/03_sound_and_music/tracks/*.mp3
+productions/**/03_sound_and_music/tracks/*.flac
+
+# Runtime & OS artifacts
+__pycache__/
+*.py[cod]
+.DS_Store
+*.tmp
+*.bak
+.env

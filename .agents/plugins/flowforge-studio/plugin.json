@@ -1,0 +1,12 @@
+{
+  "name": "flowforge-studio",
+  "displayName": "FlowForge Studio",
+  "version": "1.0.0",
+  "description": "Framework integral de producción audiovisual para Antigravity y Google Flow: desde una idea vaga hasta capítulos completos con reparto consistente, storyboard a 0 créditos, control de créditos Ultra y masterización.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "/iniciar-produccion Tengo una idea vaga para una serie y quiero desarrollar el universo y el Capítulo 1",
+    "/crear-storyboard-gratis Generar el storyboard y los First/Last Frames a 0 créditos del capítulo actual",
+    "/rodar-capitulo-flow Validar el manifiesto de planos, cotizar créditos y rodar la escena en Google Flow"
+  ]
+}

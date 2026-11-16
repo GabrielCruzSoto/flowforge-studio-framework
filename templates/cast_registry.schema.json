@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FlowForge Cast & Ingredients Registry",
+  "type": "object",
+  "required": ["production_slug", "assets"],
+  "properties": {
+    "production_slug": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "kind", "name", "verbatim_prompt_descriptor"],
+        "properties": {
+          "asset_id": { "type": "string" },
+          "kind": { "type": "string", "enum": ["character", "prop", "location"] },
+          "name": { "type": "string" },
+          "flow_asset_ref": { "type": "string" },
+          "verbatim_prompt_descriptor": { "type": "string", "minLength": 30 },
+          "portrait_source": {
+            "type": "string",
+            "enum": ["flow_character_describe", "stylized_sheet", "real_photo"]
+          },
+          "portrait_rel_path": { "type": "string" },
+          "voice_id": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      }
+    }
+  }
+}
