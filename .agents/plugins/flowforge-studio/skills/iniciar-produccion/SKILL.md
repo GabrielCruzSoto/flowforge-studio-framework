@@ -22,4 +22,4 @@ Transforma una idea embrionaria de una sola frase en un cartucho aislado de prod
      - `01_universe_bible/season_01_arc.md`: desglose de capítulos con gancho de apertura, escalada y *cliffhanger* de cierre por episodio.
    - Completar `visual_dna` en `production.yaml` en inglés técnico conciso (`aesthetic_style`, `lens_package`, `color_palette`, `lighting_signature`).
 4. **Compuerta de Revisión (`HITL`)**:
-   - Actualizar `production_gates.universe_bible: "in_review"` en `production.yaml`, presentar el resumen ejecutivo a dirección y **DETENERSE** hasta recibir aprobación explícita antes de pasar al reparto.
+   - Ejecutar `flowforge_set_gate(gate="universe_bible", state="in_review")`, presentar el resumen ejecutivo a dirección y **DETENERSE** hasta recibir aprobación explícita antes de pasar al reparto.

@@ -364,10 +364,11 @@ def _chunk_json_file(rel_path: str, text: str) -> list[dict[str, Any]]:
             kind = asset.get("kind", "asset")
             desc = asset.get("verbatim_prompt_descriptor", "")
             body = f"[{kind.upper()}] {name} (id={aid})\nDescriptor: {desc}\nFlow Ref: {asset.get('flow_asset_ref', '')}"
+            tags = [aid, name.lower()] + ([asset["base_asset_id"]] if asset.get("base_asset_id") else [])
             chunks.append(
                 {
                     "section_title": f"Cast/{kind}: {name}",
-                    "entity_tags": [aid, name.lower()],
+                    "entity_tags": tags,
                     "content": body,
                 }
             )
@@ -377,18 +378,22 @@ def _chunk_json_file(rel_path: str, text: str) -> list[dict[str, Any]]:
         for shot in data.get("shots", []):
             sid = shot.get("shot_id", "shot")
             cast_ids = shot.get("cast_ids") or []
+            location_id = shot.get("location_id") or ""
+            prop_ids = [p if isinstance(p, str) else p.get("prop_id", "") for p in (shot.get("props") or [])]
             dialogue = shot.get("spoken_dialogue", "")
             prompt = shot.get("compiled_flow_prompt") or shot.get("motion_prompt", "")
             body = (
                 f"Shot {sid} (Scene {shot.get('scene_number', 1)} | {shot.get('model', '')} | {shot.get('duration_sec', 8)}s)\n"
                 f"Cast: {', '.join(cast_ids)}\n"
+                f"Location: {location_id}\n"
+                f"Props: {', '.join(prop_ids)}\n"
                 f"Dialogue: {dialogue}\n"
                 f"Prompt: {prompt}"
             )
             chunks.append(
                 {
                     "section_title": f"Shot {sid}",
-                    "entity_tags": list(cast_ids),
+                    "entity_tags": [e for e in [*cast_ids, location_id, *prop_ids] if e],
                     "content": body,
                 }
             )
@@ -825,6 +830,28 @@ def get_canon_context(prod_dir: Path, *, up_to_episode: int | None = None, limit
             "graph_relations_count": rel_count,
             "memories_by_type": grouped,
         }
+    finally:
+        conn.close()
+
+
+def active_state_changes(prod_dir: Path, *, up_to_episode: int) -> list[dict[str, Any]]:
+    """Active on-screen state mutations (memory_type='state_change') recorded up to a given episode."""
+    conn = init_canon_db(prod_dir)
+    try:
+        rows = conn.execute(
+            """
+            SELECT title, episode_number, entities_json
+            FROM memories
+            WHERE status = 'active' AND memory_type = 'state_change'
+              AND episode_number IS NOT NULL AND episode_number <= ?
+            ORDER BY episode_number ASC, memory_id ASC
+            """,
+            (int(up_to_episode),),
+        ).fetchall()
+        return [
+            {"title": r["title"], "episode_number": r["episode_number"], "entities": json.loads(r["entities_json"])}
+            for r in rows
+        ]
     finally:
         conn.close()
 

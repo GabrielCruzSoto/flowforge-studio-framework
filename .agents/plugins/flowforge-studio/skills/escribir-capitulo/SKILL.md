@@ -21,9 +21,12 @@ Desarrolla un capítulo completo desde la escaleta hasta un `shot_manifest.json`
    - Reglas obligatorias por plano:
      - `batches`: `"x1"` (evita cobro doble accidental).
      - `model`: `"Omni 1.1 Flash"` (`4`/`6`/`8`/`10`s) para planos ágiles/transiciones o `"Veo 3.1 - Fast"` / `"Veo 3.1 - Quality"` (`8`s fijos) para planos principales.
-     - `cast_ids`: IDs registrados en `cast_registry.json`.
+     - `cast_ids`: solo personajes y criaturas registrados en `cast_registry.json`, usando la variante vigente en este capítulo.
+     - `location_id`: escenario registrado (obligatorio en planos de video).
+     - `props`: objetos presentes, con `held_by` cuando un personaje los sostiene (ej. `[{"prop_id": "pocket_watch", "held_by": "elena"}]`).
+     - `flashback: true` solo si el plano muestra intencionalmente un look anterior.
      - `motion_prompt` en inglés: una toma continua, un único movimiento físico de cámara, una acción con inicio y cierre claros, y marcas de tiempo (`0.0-1.8s:`) si hay `spoken_dialogue`.
 4. **Validación Pre-Vuelo Obligatoria**:
    - Ejecutar `flowforge_validate_shot_manifest(production_slug, episode_id, compile_prompts=true)`.
    - Resolver el 100% de `errors` y revisar `warnings` hasta obtener `valid: true`.
-   - Dejar `episode_gates.script: "in_review"` y mostrar resumen de planos + estimación preliminar de créditos.
+   - Ejecutar `flowforge_set_gate(gate="script", state="in_review", episode_id)` (exige manifiesto validado y sin cambios posteriores) y mostrar resumen de planos + estimación preliminar de créditos.

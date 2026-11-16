@@ -17,7 +17,7 @@ Este directorio es **FlowForge Studio**, un framework de producción audiovisual
 
 1. **Producción Activa Obligatoria (`production_slug`)**: Toda lectura o escritura creativa exige un `production_slug` explícito confinado a `productions/{production_slug}/`. Si no existe o no fue indicado, consultar antes de acceder a `productions/`.
 2. **Prohibición de Búsquedas Cruzadas**: Queda prohibido ejecutar búsquedas globales (`grep`, `find`) sobre la raíz `productions/`. Cada universo narrativo es hermético.
-3. **Memoria Persistente en Disco porque Google Flow No Tiene Memoria**: Google Flow carece de memoria entre escenas y entre proyectos. Toda identidad visual (`visual_dna`), descriptores literales de personajes (`02_cast_and_ingredients/cast_registry.json`), estado de episodios (`episodes/ep_{NN}_{slug}/episode.yaml`) y contabilidad de créditos (`credit_ledger.json`) residen en el cartucho de la producción y deben inyectarse explícitamente en cada plano.
+3. **Memoria Persistente en Disco porque Google Flow No Tiene Memoria**: Google Flow carece de memoria entre escenas y entre proyectos. Toda identidad visual (`visual_dna`), fichas estructuradas de personajes, criaturas, objetos y escenarios con su núcleo compilado (`02_cast_and_ingredients/cast_registry.json`), estado de episodios (`episodes/ep_{NN}_{slug}/episode.yaml`) y contabilidad de créditos (`credit_ledger.json`) residen en el cartucho de la producción y deben inyectarse explícitamente en cada plano.
 
 ---
 
@@ -30,7 +30,7 @@ El framework separa estrictamente los dos modos de `flow.google.com` según la e
    - **Prohibido para rodaje final de video**: El Agente de Flow parafrasea los prompts ópticos y sus tarjetas fallidas carecen de botón *Retry* gratuito.
 2. **Modo Directo / Agente DESACTIVADO (`flow_generate`, lote `x1`) -> Rodaje Principal de Video**:
    - Todo plano de video pagado se ejecuta con el modo Agente apagado y multiplicador **`x1`** (evitando cobros dobles accidentales por `x2`/`x4`).
-   - Cada plano debe pasar previamente por `flowforge_validate_shot_manifest` y `flowforge_quote_and_log_credits`.
+   - Cada plano debe pasar previamente por `flowforge_validate_shot_manifest` y `flowforge_quote_and_log_credits` (la cotización emite un `quote_id` ligado a la huella del manifiesto; todo registro de gasto lo exige).
 3. **Regla de Retratos para Video**: Los personajes recurrentes destinados a video deben crearse mediante descripción ilustrada/generada (`flow_character` con `describe` o lámina neutra de *Nano Banana 2.1*), evitando subir fotografías de personas reales que disparen bloqueos de políticas en video.
 4. **Regla de Continuidad Exacta (`chain_previous` / `flow_continue`)**: Para cortes invisibles entre dos planos continuos se prioriza el anclaje al último fotograma real extraído (`mode: "exact"` o `flowforge_extract_frame`), dado que Google Flow no permite fijar simultáneamente un cuadro inicial exacto y un avatar externo sin producir salto visual.
 
@@ -38,7 +38,7 @@ El framework separa estrictamente los dos modos de `flow.google.com` según la e
 
 ## Ley 03: Máquina de Estados, Compuertas Humanas (`HITL`) y Presupuesto de Créditos
 
-Ningún agente marca por cuenta propia una compuerta como `approved`. Al concluir una fase, deja el estado en `in_review`, presenta el entregable (y la cotización de créditos si el siguiente paso consume saldo de Google AI Ultra) y **SE DETIENE** hasta recibir aprobación explícita.
+Ningún agente marca por cuenta propia una compuerta como `approved`. Toda transición de compuerta se hace exclusivamente con `flowforge_set_gate` (nunca editando `production.yaml`/`episode.yaml` a mano: `flowforge_check_gates` ignora aprobaciones sin auditoría en `gate_history`). Al concluir una fase, deja el estado en `in_review`, presenta el entregable (y la cotización de créditos si el siguiente paso consume saldo de Google AI Ultra) y **SE DETIENE** hasta recibir aprobación explícita.
 
 ### Compuertas de Nivel Producción (`production.yaml`)
 1. `universe_bible`: Semilla expandida en biblia de mundo, `visual_dna` y arco de temporada/obra (`01_universe_bible/`).

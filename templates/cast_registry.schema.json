@@ -1,30 +1,261 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FlowForge Cast & Ingredients Registry",
+  "description": "Structured visual sheets. verbatim_prompt_descriptor is compiled by flowforge_register_cast_asset; never edit it by hand.",
   "type": "object",
-  "required": ["production_slug", "assets"],
+  "required": [
+    "production_slug",
+    "assets"
+  ],
   "properties": {
-    "production_slug": { "type": "string" },
-    "updated_at": { "type": "string" },
+    "production_slug": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
     "assets": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["asset_id", "kind", "name", "verbatim_prompt_descriptor"],
+        "required": [
+          "asset_id",
+          "kind",
+          "name",
+          "visual_spec",
+          "continuity_locks",
+          "verbatim_prompt_descriptor"
+        ],
         "properties": {
-          "asset_id": { "type": "string" },
-          "kind": { "type": "string", "enum": ["character", "prop", "location"] },
-          "name": { "type": "string" },
-          "flow_asset_ref": { "type": "string" },
-          "verbatim_prompt_descriptor": { "type": "string", "minLength": 30 },
+          "asset_id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "character",
+              "creature",
+              "location",
+              "prop"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "base_asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "valid_from_episode": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "valid_until_episode": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "visual_spec": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "\\S+\\s+\\S+"
+            }
+          },
+          "continuity_locks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "verbatim_prompt_descriptor": {
+            "type": "string"
+          },
+          "reference_notes": {
+            "type": "string"
+          },
+          "flow_asset_ref": {
+            "type": "string"
+          },
           "portrait_source": {
             "type": "string",
-            "enum": ["flow_character_describe", "stylized_sheet", "real_photo"]
+            "enum": [
+              "flow_character_describe",
+              "stylized_sheet",
+              "real_photo"
+            ]
           },
-          "portrait_rel_path": { "type": "string" },
-          "voice_id": { "type": "string" },
-          "updated_at": { "type": "string" }
-        }
+          "portrait_rel_path": {
+            "type": "string"
+          },
+          "sheet_rel_path": {
+            "type": "string"
+          },
+          "voice_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "character"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "visual_spec": {
+                  "required": [
+                    "apparent_age",
+                    "build",
+                    "face",
+                    "skin",
+                    "hair",
+                    "eyes",
+                    "wardrobe",
+                    "palette"
+                  ],
+                  "propertyNames": {
+                    "enum": [
+                      "apparent_age",
+                      "build",
+                      "face",
+                      "skin",
+                      "hair",
+                      "eyes",
+                      "wardrobe",
+                      "palette",
+                      "distinguishing_marks",
+                      "accessories",
+                      "posture"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "creature"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "visual_spec": {
+                  "required": [
+                    "scale",
+                    "silhouette",
+                    "anatomy",
+                    "surface",
+                    "palette",
+                    "eyes",
+                    "locomotion"
+                  ],
+                  "propertyNames": {
+                    "enum": [
+                      "scale",
+                      "silhouette",
+                      "anatomy",
+                      "surface",
+                      "palette",
+                      "eyes",
+                      "locomotion",
+                      "distinguishing_marks",
+                      "movement_quirks"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "prop"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "visual_spec": {
+                  "required": [
+                    "scale",
+                    "shape",
+                    "materials",
+                    "palette",
+                    "surface_details",
+                    "orientation_rule"
+                  ],
+                  "propertyNames": {
+                    "enum": [
+                      "scale",
+                      "shape",
+                      "materials",
+                      "palette",
+                      "surface_details",
+                      "orientation_rule",
+                      "markings"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "location"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "visual_spec": {
+                  "required": [
+                    "setting",
+                    "layout",
+                    "landmarks",
+                    "materials",
+                    "palette",
+                    "lighting",
+                    "atmosphere"
+                  ],
+                  "propertyNames": {
+                    "enum": [
+                      "setting",
+                      "layout",
+                      "landmarks",
+                      "materials",
+                      "palette",
+                      "lighting",
+                      "atmosphere",
+                      "time_of_day",
+                      "weather"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   }

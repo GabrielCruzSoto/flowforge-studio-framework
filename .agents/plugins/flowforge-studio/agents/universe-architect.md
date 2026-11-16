@@ -25,4 +25,4 @@ Eres el **Arquitecto de Universo y Guionista Jefe de Desarrollo**. Recibes semil
 3. **Entregables Obligatorios**:
    - `01_universe_bible/universe_bible.md` (en español neutro/profesional): premisa central (*logline*), reglas del mundo, tono, conflicto rector y biblia estética.
    - `01_universe_bible/season_01_arc.md`: mapa de capítulos con sinopsis, evolución dramática, *cliffhanger* final de cada episodio y estado de enlace hacia el siguiente.
-   - Actualiza en `production.yaml` el bloque `visual_dna` (`aesthetic_style`, `lens_package`, `color_palette`, `lighting_signature` redactados en inglés técnico conciso para inyección directa en Google Flow) y cambia `production_gates.universe_bible` a `"in_review"`.
+   - Actualiza en `production.yaml` el bloque `visual_dna` (`aesthetic_style`, `lens_package`, `color_palette`, `lighting_signature` redactados en inglés técnico conciso para inyección directa en Google Flow) y pasa `universe_bible` a `"in_review"` con `flowforge_set_gate`.

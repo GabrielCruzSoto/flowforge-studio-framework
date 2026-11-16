@@ -23,4 +23,4 @@ Une los planos aprobados del capítulo, mezcla narración y música con *ducking
    - Paso B: Mostrar el texto transcrito al usuario corrigiendo posibles errores fonéticos en nombres propios y esperar confirmación.
    - Paso C: Con el texto confirmado, ejecutar `flow_captions` una sola vez (estilo `clean` para cine/serie o `bold` para formato vertical `9:16`).
 5. **Cierre de Capítulo**:
-   - Actualizar `episode_gates.postprod` y `episode_gates.master` a `"in_review"` y presentar ruta del máster y métricas finales.
+   - Ejecutar `flowforge_set_gate` con `state="in_review"` para `postprod` (y para `master` una vez aprobado `postprod`) y presentar ruta del máster y métricas finales.

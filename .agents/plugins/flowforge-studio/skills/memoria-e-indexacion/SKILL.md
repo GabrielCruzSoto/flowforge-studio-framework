@@ -24,6 +24,7 @@ Permite que el estudio recuerde cada detalle narrativo, visual y técnico a lo l
 ### 3. Persistir Hechos, Cambios de Estado e Hilos Abiertos al Cerrar Cada Fase
 - **Hechos y mutaciones (`flowforge_memory_save`):**
   - `memory_type`: `"canon_fact"` | `"state_change"` | `"plot_thread"` | `"visual_rule"` | `"director_preference"` | `"continuity_warning"`.
+  - Los `state_change` deben llevar `episode_number` y `entities` con los `asset_id` afectados: el validador de planos los cruza con las variantes del reparto y avisa si un cambio visible todavía no tiene variante.
   - Usar `topic_key` jerárquico (ej. `state/elena/abrigo`, `thread/llave_maestra`) para actualizar estados conservando historial completo de revisiones, y pasar `"status": "resolved"` cuando un hilo dramático se cierre.
 - **Relaciones del grafo (`flowforge_graph_link`):**
   - Conectar entidades (`subject_id`, `relation`, `object_id`, `since_episode`, `until_episode`).

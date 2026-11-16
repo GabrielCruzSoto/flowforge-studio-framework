@@ -22,4 +22,4 @@ Aprovecha la gratuidad de generación de imágenes en Google Flow (**0 créditos
    - Actualizar `first_frame_rel_path` (y `last_frame_rel_path` cuando aplique) en `01_script/shot_manifest.json` y re-validar con `flowforge_validate_shot_manifest`.
    - Ejecutar `flowforge_render_contact_sheet` generando `02_storyboard/storyboard_grid.png`.
 4. **Compuerta Visual (`HITL`)**:
-   - Marcar `episode_gates.storyboard: "in_review"`, presentar `storyboard_grid.png` a dirección y **DETENERSE** hasta su aprobación.
+   - Ejecutar `flowforge_set_gate(gate="storyboard", state="in_review", episode_id)`, presentar `storyboard_grid.png` a dirección y **DETENERSE** hasta su aprobación.

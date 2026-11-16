@@ -2,22 +2,55 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FlowForge Episode Shot Manifest",
   "type": "object",
-  "required": ["production_slug", "episode_id", "shots"],
+  "required": [
+    "production_slug",
+    "episode_id",
+    "shots"
+  ],
   "properties": {
-    "production_slug": { "type": "string" },
-    "episode_id": { "type": "string" },
-    "validated_at": { "type": "string" },
-    "estimated_total_credits": { "type": "integer", "minimum": 0 },
+    "production_slug": {
+      "type": "string"
+    },
+    "episode_id": {
+      "type": "string"
+    },
+    "validated_at": {
+      "type": "string"
+    },
+    "estimated_total_credits": {
+      "type": "integer",
+      "minimum": 0
+    },
     "shots": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["shot_id", "scene_number", "model", "duration_sec", "batches", "motion_prompt"],
+        "required": [
+          "shot_id",
+          "scene_number",
+          "model",
+          "duration_sec",
+          "batches",
+          "motion_prompt"
+        ],
         "properties": {
-          "shot_id": { "type": "string", "pattern": "^shot_[0-9]{2,3}$" },
-          "scene_number": { "type": "integer", "minimum": 1 },
-          "media_type": { "type": "string", "enum": ["video", "image"], "default": "video" },
+          "shot_id": {
+            "type": "string",
+            "pattern": "^shot_[0-9]{2,3}$"
+          },
+          "scene_number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "media_type": {
+            "type": "string",
+            "enum": [
+              "video",
+              "image"
+            ],
+            "default": "video"
+          },
           "model": {
             "type": "string",
             "enum": [
@@ -30,21 +63,124 @@
               "Nano Banana Pro"
             ]
           },
-          "duration_sec": { "type": "integer", "minimum": 3, "maximum": 15 },
-          "aspect_ratio": { "type": "string", "enum": ["16:9", "9:16"], "default": "16:9" },
-          "batches": { "type": "string", "enum": ["x1", "x2", "x3", "x4"], "default": "x1" },
-          "allow_multi_batch": { "type": "boolean", "default": false },
-          "cast_ids": { "type": "array", "items": { "type": "string" } },
-          "reference_images": { "type": "array", "maxItems": 6, "items": { "type": "string" } },
-          "first_frame_rel_path": { "type": "string" },
-          "last_frame_rel_path": { "type": "string" },
-          "chain_previous": { "type": "boolean", "default": false },
-          "continuity_mode": { "type": "string", "enum": ["exact", "likeness"], "default": "exact" },
-          "camera_technique": { "type": "string" },
-          "spoken_dialogue": { "type": "string" },
-          "motion_prompt": { "type": "string", "minLength": 20 },
-          "compiled_flow_prompt": { "type": "string" },
-          "estimated_credits": { "type": "integer", "minimum": 0 }
+          "duration_sec": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 15
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "default": "16:9"
+          },
+          "batches": {
+            "type": "string",
+            "enum": [
+              "x1",
+              "x2",
+              "x3",
+              "x4"
+            ],
+            "default": "x1"
+          },
+          "allow_multi_batch": {
+            "type": "boolean",
+            "default": false
+          },
+          "cast_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Characters and creatures only (use the variant valid for this episode)"
+          },
+          "reference_images": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string"
+            }
+          },
+          "first_frame_rel_path": {
+            "type": "string"
+          },
+          "last_frame_rel_path": {
+            "type": "string"
+          },
+          "chain_previous": {
+            "type": "boolean",
+            "default": false
+          },
+          "continuity_mode": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "likeness"
+            ],
+            "default": "exact"
+          },
+          "camera_technique": {
+            "type": "string"
+          },
+          "spoken_dialogue": {
+            "type": "string"
+          },
+          "motion_prompt": {
+            "type": "string",
+            "minLength": 20
+          },
+          "compiled_flow_prompt": {
+            "type": "string"
+          },
+          "estimated_credits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "location_id": {
+            "type": "string",
+            "description": "Registered location; required for video shots"
+          },
+          "props": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "prop_id"
+                  ],
+                  "properties": {
+                    "prop_id": {
+                      "type": "string"
+                    },
+                    "held_by": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "flashback": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allows out-of-period look variants"
+          },
+          "resolved_reference_images": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "string"
+            },
+            "description": "Compiled by the validator"
+          }
         }
       }
     }
